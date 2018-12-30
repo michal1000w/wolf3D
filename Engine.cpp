@@ -125,6 +125,7 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
   if (DistanceToWall <= MaxRenderDistance / 4.0f)     nShade = '#';
   else if (DistanceToWall < MaxRenderDistance / 3.0f) nShade = 'O';
   else if (DistanceToWall < MaxRenderDistance / 2.0f) nShade = 'i';
+  else if (DistanceToWall < MaxRenderDistance / 1.5f) nShade = ';';
   else if (DistanceToWall < MaxRenderDistance)        nShade = '.';
   else                                                nShade = ' ';
 
