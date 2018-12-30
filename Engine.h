@@ -19,6 +19,7 @@ const int nScreenHeight = 45;
 
 class Engine{
   char buffer[nScreenHeight][nScreenWidth];
+  //wchar_t buffer[nScreenHeight][nScreenWidth];
   char colorMap[nScreenHeight][nScreenWidth];
   wstring map;
   vector <string> wallTexture;

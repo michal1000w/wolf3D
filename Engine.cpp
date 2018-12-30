@@ -1,7 +1,7 @@
 #include "Engine.h"
 
 void Engine::Init(){
-  setlocale(LC_ALL, "UTF-8");
+  //setlocale(LC_ALL, "");
 
   initscr();
   noecho();
@@ -121,12 +121,14 @@ void Engine::MainLoop(){
 
 void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary, int x, float SampleX){
   //Shader walls based on Distance
-  short nShade = ' ';
-  if (DistanceToWall <= MaxRenderDistance / 4.0f)     nShade = '#';
-  else if (DistanceToWall < MaxRenderDistance / 3.0f) nShade = 'O';
-  else if (DistanceToWall < MaxRenderDistance / 2.0f) nShade = 'i';
-  else if (DistanceToWall < MaxRenderDistance / 1.5f) nShade = ';';
-  else if (DistanceToWall < MaxRenderDistance)        nShade = '.';
+
+  //short nShade = ' ';
+  wchar_t nShade = ' ';
+  if (DistanceToWall <= MaxRenderDistance / 4.0f)     nShade = L'\U0001F638'; //#
+  else if (DistanceToWall < MaxRenderDistance / 3.0f) nShade = 'O'; //O
+  else if (DistanceToWall < MaxRenderDistance / 2.0f) nShade = 'i'; //i
+  else if (DistanceToWall < MaxRenderDistance / 1.5f) nShade = ';'; //;
+  else if (DistanceToWall < MaxRenderDistance)        nShade = '.'; //.
   else                                                nShade = ' ';
 
   if (Boundary) nShade = ' ';
