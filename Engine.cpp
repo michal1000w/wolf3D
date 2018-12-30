@@ -30,8 +30,8 @@ void Engine::InitMap(){
   map += L"#........#.....#";
   map += L"#........#.....#";
   map += L"#..............#";
-  map += L"#..............#";
-  map += L"#..HHHH..###..##";
+  map += L"#...H..........#";
+  map += L"#..HH....###..##";
   map += L"#........#.....#";
   map += L"#........#.....#";
   map += L"#..............#";
@@ -74,7 +74,7 @@ void Engine::MainLoop(){
     for (int x = 0; x < nScreenWidth; x++){
       float RayAngle = (Player.Angle - Player.FOV / 2.0f) + ((float)x / (float)nScreenWidth) * Player.FOV;
 
-      float StepSize = 0.1f;
+      float StepSize = 0.05f;
       float DistanceToWall = 0.0f;
 
       bool HitWall = false;
@@ -156,7 +156,7 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
         if (wallRodzaj == 1)
           colorMap[y][x] = wallTexture[sy][sx];
         else if (wallRodzaj == 2)
-          colorMap[y][x] = 'G';
+          colorMap[y][x] = 'B';
       }
 
     }
@@ -168,7 +168,7 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
       else if (b < 0.9)  nShade = '-';
       else               nShade = ' ';
       buffer[y][x] = nShade;
-      colorMap[y][x] = 'B';
+      colorMap[y][x] = 'G';
     }
   }
 }

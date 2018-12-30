@@ -13,8 +13,8 @@
 using namespace std;
 
 //wymiary ekranu
-const int nScreenWidth = 120;
-const int nScreenHeight = 40;
+const int nScreenWidth = 140;
+const int nScreenHeight = 45;
 
 
 class Engine{
