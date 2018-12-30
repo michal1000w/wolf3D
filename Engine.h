@@ -19,7 +19,9 @@ const int nScreenHeight = 40;
 
 class Engine{
   char buffer[nScreenHeight][nScreenWidth];
+  char colorMap[nScreenHeight][nScreenWidth];
   wstring map;
+  vector <string> wallTexture;
   //Gracz
   struct player {
     float X;
@@ -43,8 +45,8 @@ private:
   void DrawMap();
   void DrawBoard();
   char PlayerMove(float);
-  void RayCasting(float &,float &,bool &,bool &,float &,float &);
-  void Shading(float, int, int, bool, int);
+  void RayCasting(float &,float &,bool &,bool &,float &,float &, int&,int&);
+  void Shading(float, int, int, bool, int, float);
 };
 
 #endif

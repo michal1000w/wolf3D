@@ -12,7 +12,7 @@ void Engine::Init(){
   Player.Y = 5.09f;
   Player.Angle = 0.0f;
   Player.FOV = 3.1415 / 4.0f;
-  Player.Speed = 35.0f;
+  Player.Speed = 45.0f;
 
   FillEmpty();
 
@@ -38,6 +38,23 @@ void Engine::InitMap(){
   map += L"#........#######";
   map += L"#..............#";
   map += L"################";
+
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("WWWWWWWWWWWWWWWW");
+  wallTexture.push_back("WRRRRRWRRRRRWRRR");
+  wallTexture.push_back("WRRRRRWRRRRRWRRR");
+  wallTexture.push_back("WWWWWWWWWWWWWWWW");
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("WWWWWWWWWWWWWWWW");
+  wallTexture.push_back("WRRRRRWRRRRRWRRR");
+  wallTexture.push_back("WRRRRRWRRRRRWRRR");
+  wallTexture.push_back("WWWWWWWWWWWWWWWW");
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("RRRWRRRRRWRRRRRW");
+  wallTexture.push_back("WWWWWWWWWWWWWWWW");
+  wallTexture.push_back("WRRRRRWRRRRRWRRR");
 }
 
 void Engine::MainLoop(){
@@ -66,13 +83,31 @@ void Engine::MainLoop(){
       float EyeX = sinf(RayAngle);
       float EyeY = cosf(RayAngle);
 
-      RayCasting(StepSize,DistanceToWall,HitWall,Boundary,EyeX,EyeY);
+      int TestX, TestY;
+      RayCasting(StepSize,DistanceToWall,HitWall,Boundary,EyeX,EyeY, TestX, TestY);
 
       //Obliczanie dystansu między sufitem a podłogą
       int Ceiling = (float)(nScreenHeight / 2.0) - nScreenHeight / ((float)DistanceToWall);
       int Floor = nScreenHeight - Ceiling;
 
-      Shading(DistanceToWall, Ceiling, Floor, Boundary, x);
+      //obliczenia do tekstury
+      float BlockMidX = (float)TestX + 0.5f;
+      float BlockMidY = (float)TestY + 0.5f;
+      float fTestPointX = Player.X + EyeX * DistanceToWall;
+      float fTestPointY = Player.Y + EyeY * DistanceToWall;
+      float SampleX = 0.0f;
+
+      float TestAngle = atan2((fTestPointY - BlockMidY), (fTestPointX - BlockMidX));
+        if (TestAngle >= -3.1415f * 0.25f && TestAngle < 3.1415f * 0.25f)
+          SampleX = fTestPointY - (float)TestY;
+        if (TestAngle >= 3.1415f * 0.25f && TestAngle < 3.1415f * 0.75f)
+          SampleX = fTestPointX - (float)TestX;
+        if (TestAngle < -3.1415f * 0.25f && TestAngle >= -3.1415f * 0.75f)
+          SampleX = fTestPointX - (float)TestX;
+        if (TestAngle >= 3.1415f * 0.75f || TestAngle < -3.1415f * 0.75f)
+          SampleX = fTestPointY - (float)TestY;
+
+      Shading(DistanceToWall, Ceiling, Floor, Boundary, x, SampleX);
     }
 
     DrawMap();
@@ -84,7 +119,7 @@ void Engine::MainLoop(){
   }
 }
 
-void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary, int x){
+void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary, int x, float SampleX){
   //Shader walls based on Distance
   short nShade = ' ';
   if (DistanceToWall <= MaxRenderDistance / 4.0f)     nShade = '#';
@@ -96,10 +131,30 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
   if (Boundary) nShade = ' ';
 
   for (int y = 0; y < nScreenHeight; y++){
-    if (y <= Ceiling)
+    if (y <= Ceiling){
       buffer[y][x] = ' ';
+      colorMap[y][x] = 'W';
+    }
     else if (y > Ceiling && y <= Floor)
-      buffer[y][x] = nShade;
+    {
+      if (DistanceToWall < MaxRenderDistance)
+        buffer[y][x] = nShade;
+
+      //tesktura
+      float tX, tY;
+      tX = SampleX;
+      tY = ((float)y - (float)Ceiling) / ((float)Floor - (float)Ceiling);
+
+      int textureSize = wallTexture.size();
+
+      int sx = tX * (float)textureSize;
+      int sy = tY * (float)textureSize-1;
+      if (sx < 0 || sx > textureSize || sy < 0 || sy > textureSize)
+        colorMap[y][x] = ' ';
+      else
+        colorMap[y][x] = wallTexture[sy][sx];
+
+    }
     else {
       float b = 1.0f - (((float)y - nScreenHeight / 2.0f) / ((float)nScreenHeight / 2.0f));
       if (b < 0.25)      nShade = '&';
@@ -108,6 +163,7 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
       else if (b < 0.9)  nShade = '-';
       else               nShade = ' ';
       buffer[y][x] = nShade;
+      colorMap[y][x] = 'B';
     }
   }
 }
@@ -138,9 +194,9 @@ void Engine::DrawBoard(){
   move(0,0);
   for (int y = 0; y < nScreenHeight; y++){
     for (int x = 0; x < nScreenWidth; x++){
-      if (buffer[y][x] == '&' || buffer[y][x] == 'x' || buffer[y][x] == ',' || buffer[y][x] == '-')
+      if (colorMap[y][x] == 'B')
         attron(COLOR_PAIR(2));
-      else if (buffer[y][x] == 'P')
+      else if (buffer[y][x] == 'P' || colorMap[y][x] == 'R')
         attron(COLOR_PAIR(3));
       else
         attroff(COLOR_PAIRS);
@@ -150,11 +206,11 @@ void Engine::DrawBoard(){
   }
 }
 
-void Engine::RayCasting(float &StepSize,float &DistanceToWall,bool &HitWall,bool &Boundary,float &EyeX,float &EyeY){
+void Engine::RayCasting(float &StepSize,float &DistanceToWall,bool &HitWall,bool &Boundary,float &EyeX,float &EyeY, int &TestX, int &TestY){
   while (!HitWall && DistanceToWall < MaxRenderDistance){
     DistanceToWall += StepSize;
-    int TestX = (int)(Player.X + EyeX * DistanceToWall);
-    int TestY = (int)(Player.Y + EyeY * DistanceToWall);
+    TestX = (int)(Player.X + EyeX * DistanceToWall);
+    TestY = (int)(Player.Y + EyeY * DistanceToWall);
 
     if (TestX < 0 || TestX >= MapWidth || TestY < 0 || TestY >= MapHeight){
       HitWall = true;
@@ -228,6 +284,8 @@ char Engine::PlayerMove(float ElapsedTime){
 
 void Engine::FillEmpty(){
   for (int y = 0; y < nScreenHeight; y++)
-    for (int x = 0; x < nScreenWidth; x++)
+    for (int x = 0; x < nScreenWidth; x++){
       buffer[y][x] = ' ';
+      colorMap[y][x] = ' ';
+    }
 }
