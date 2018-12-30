@@ -31,7 +31,7 @@ void Engine::InitMap(){
   map += L"#........#.....#";
   map += L"#..............#";
   map += L"#..............#";
-  map += L"#........###..##";
+  map += L"#..HHHH..###..##";
   map += L"#........#.....#";
   map += L"#........#.....#";
   map += L"#..............#";
@@ -152,8 +152,12 @@ void Engine::Shading(float DistanceToWall, int Ceiling, int Floor, bool Boundary
       int sy = tY * (float)textureSize-1;
       if (sx < 0 || sx > textureSize || sy < 0 || sy > textureSize)
         colorMap[y][x] = ' ';
-      else
-        colorMap[y][x] = wallTexture[sy][sx];
+      else{
+        if (wallRodzaj == 1)
+          colorMap[y][x] = wallTexture[sy][sx];
+        else if (wallRodzaj == 2)
+          colorMap[y][x] = 'G';
+      }
 
     }
     else {
@@ -192,6 +196,7 @@ void Engine::DrawBoard(){
   init_pair(1, COLOR_WHITE, -1);
   init_pair(2, COLOR_BLUE, -1);
   init_pair(3, COLOR_RED, -1);
+  init_pair(4, COLOR_GREEN, -1);
   move(0,0);
   for (int y = 0; y < nScreenHeight; y++){
     for (int x = 0; x < nScreenWidth; x++){
@@ -199,6 +204,8 @@ void Engine::DrawBoard(){
         attron(COLOR_PAIR(2));
       else if (buffer[y][x] == 'P' || colorMap[y][x] == 'R')
         attron(COLOR_PAIR(3));
+      else if (colorMap[y][x] == 'G')
+        attron(COLOR_PAIR(4));
       else
         attroff(COLOR_PAIRS);
       printw("%c", buffer[y][x]);
@@ -217,7 +224,14 @@ void Engine::RayCasting(float &StepSize,float &DistanceToWall,bool &HitWall,bool
       HitWall = true;
       DistanceToWall = MaxRenderDistance;
     } else {
-      if (map.c_str()[TestX * MapWidth + TestY] == '#'){
+      if (map.c_str()[TestX * MapWidth + TestY] == '#' || map.c_str()[TestX * MapWidth + TestY] == 'H'){
+        //rodaj ściany
+        if (map.c_str()[TestX * MapWidth + TestY] == '#')
+          wallRodzaj = 1;
+        else if (map.c_str()[TestX * MapWidth + TestY] == 'H')
+          wallRodzaj = 2;
+
+
         //Ray hits HitWall
         HitWall = true;
 
@@ -260,7 +274,7 @@ char Engine::PlayerMove(float ElapsedTime){
     Player.X += sinf(Player.Angle) * Player.Speed * ElapsedTime;;
     Player.Y += cosf(Player.Angle) * Player.Speed * ElapsedTime;;
     //sprawdzanie kolizji
-    if (map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == '#'){
+    if (map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == '#' || map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == 'H'){
       Player.X -= sinf(Player.Angle) * Player.Speed * ElapsedTime;;
       Player.Y -= cosf(Player.Angle) * Player.Speed * ElapsedTime;;
     }
@@ -268,7 +282,7 @@ char Engine::PlayerMove(float ElapsedTime){
     Player.X -= sinf(Player.Angle) * Player.Speed * ElapsedTime;;
     Player.Y -= cosf(Player.Angle) * Player.Speed * ElapsedTime;;
     //sprawdzanie kolizji
-    if (map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == '#'){
+    if (map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == '#' || map.c_str()[(int)Player.X * MapWidth + (int)Player.Y] == 'H'){
       Player.X += sinf(Player.Angle) * Player.Speed * ElapsedTime;;
       Player.Y += cosf(Player.Angle) * Player.Speed * ElapsedTime;;
     }

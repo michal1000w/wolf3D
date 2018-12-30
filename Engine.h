@@ -32,6 +32,7 @@ class Engine{
   };
   player Player;
   float MaxRenderDistance;
+  int wallRodzaj;
   //wymiary mapy
   int MapWidth;
   int MapHeight;
