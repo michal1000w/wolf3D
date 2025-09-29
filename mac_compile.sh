@@ -1,1 +1,1 @@
-g++ -std=c++11 *.cpp -o grazaliczenie -lncurses
+g++ -std=c++11 -march=native -O3 *.cpp -o grazaliczenie -lncurses
